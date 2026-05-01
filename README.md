@@ -6,7 +6,7 @@ A production-grade flight booking platform built as a **Spring Boot monolith**, 
 
 ## 🚀 Live Demo
 
-> Coming soon — deploying to Koyeb
+> Coming soon — deploying in proccess
 
 ---
 
