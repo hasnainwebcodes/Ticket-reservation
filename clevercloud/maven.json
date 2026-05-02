@@ -1,5 +1,0 @@
-{
-  "deploy": {
-    "goal": "package -DskipTests -Dmaven.test.skip=true"
-  }
-}
