@@ -6,6 +6,7 @@ src/main/resources/application - Copy..properties
 .classpath
 .factorypath
 .project
+target/
 .settings
 .springBeans
 .sts4-cache
