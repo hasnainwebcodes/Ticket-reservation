@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Register')}"></head>
+<body>
+
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card p-4">
+
+                <div class="text-center mb-4">
+                    <i class="bi bi-person-plus text-primary" style="font-size:3rem;"></i>
+                    <h3 class="fw-bold mt-2">Create Account</h3>
+                    <p class="text-muted">Join TicketFlow today</p>
+                </div>
+
+                <div id="alertBox"></div>
+
+                <form id="registerForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">First Name</label>
+                            <input type="text" id="firstName" class="form-control"
+                                   placeholder="Hasnain" required/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Last Name</label>
+                            <input type="text" id="lastName" class="form-control"
+                                   placeholder="Raza" required/>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input type="email" id="email" class="form-control"
+                                       placeholder="your@email.com" required/>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Phone Number
+                                <span class="text-muted fw-normal">(optional)</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                <input type="tel" id="phone" class="form-control"
+                                       placeholder="+92 300 0000000"/>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                <input type="password" id="password" class="form-control"
+                                       placeholder="Min 8 characters" minlength="8" required/>
+                                <button class="btn btn-outline-secondary" type="button"
+                                        onclick="togglePassword()">
+                                    <i class="bi bi-eye" id="eyeIcon"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">Must be at least 8 characters.</div>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" id="submitBtn"
+                                    class="btn btn-primary w-100 py-3 fw-semibold">
+                                <i class="bi bi-person-plus me-2"></i>Create Account
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <hr class="my-4"/>
+                <p class="text-center text-muted mb-0">
+                    Already have an account?
+                    <a href="/login" class="text-primary fw-semibold">Login here</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{layout :: footer}"></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function togglePassword() {
+    const pwd  = document.getElementById('password');
+    const icon = document.getElementById('eyeIcon');
+    if (pwd.type === 'password') {
+        pwd.type = 'text';
+        icon.className = 'bi bi-eye-slash';
+    } else {
+        pwd.type = 'password';
+        icon.className = 'bi bi-eye';
+    }
+}
+
+function showAlert(msg, type) {
+    const box = document.getElementById('alertBox');
+    box.innerHTML = `
+        <div class="alert alert-${type} d-flex align-items-center mb-3">
+            <i class="bi bi-exclamation-circle me-2"></i>${msg}
+        </div>`;
+    setTimeout(() => box.innerHTML = '', 5000);
+}
+
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const btn = document.getElementById('submitBtn');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating...';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                firstName: document.getElementById('firstName').value.trim(),
+                lastName:  document.getElementById('lastName').value.trim(),
+                email:     document.getElementById('email').value.trim(),
+                password:  document.getElementById('password').value,
+                phone:     document.getElementById('phone').value.trim() || null
+            })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            // Store ONLY display data — cookie handles real auth
+            localStorage.setItem('user', JSON.stringify({
+                firstName: data.data.firstName,
+                lastName:  data.data.lastName,
+                email:     data.data.email,
+                role:      data.data.role
+            }));
+            window.location.href = '/search-flights';
+        } else {
+            showAlert(data.message || 'Registration failed. Please try again.', 'danger');
+        }
+    } catch (err) {
+        showAlert('Something went wrong. Please try again.', 'danger');
+    } finally {
+        btn.innerHTML = '<i class="bi bi-person-plus me-2"></i>Create Account';
+        btn.disabled = false;
+    }
+});
+</script>
+
+<div th:replace="~{layout :: authScript}"></div>
+</body>
+</html>
