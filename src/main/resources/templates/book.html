@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Book Flight')}"></head>
+<body>
+
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<div class="container py-5">
+    <div class="row g-4">
+
+        <!-- ─── Passenger + Payment Form ───────────────────────── -->
+        <div class="col-lg-8">
+            <div class="card p-4">
+                <h4 class="fw-bold mb-4">
+                    <i class="bi bi-person-check text-primary me-2"></i>
+                    Passenger Details
+                </h4>
+
+                <div id="alertBox"></div>
+
+                <form id="bookingForm">
+                    <input type="hidden" id="flightId" th:value="${flightId}"/>
+                    <input type="hidden" id="seatId"   th:value="${seatId}"/>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Full Name</label>
+                            <input type="text" id="passengerName" class="form-control"
+                                   placeholder="As per CNIC / Passport" required/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Phone Number</label>
+                            <input type="tel" id="passengerPhone" class="form-control"
+                                   placeholder="+92 300 0000000" required/>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Email Address</label>
+                            <input type="email" id="passengerEmail" class="form-control"
+                                   placeholder="Booking confirmation will be sent here" required/>
+                        </div>
+                    </div>
+
+                    <hr class="my-4"/>
+
+                    <h5 class="fw-bold mb-3">
+                        <i class="bi bi-credit-card text-primary me-2"></i>
+                        Payment
+                        <span class="badge bg-warning text-dark ms-2"
+                              style="font-size:0.7rem;">Test Mode</span>
+                    </h5>
+
+                    <div class="alert alert-info py-2 small mb-3">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Test card: <strong>4242 4242 4242 4242</strong> &mdash; any future expiry, any CVV
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Card Number</label>
+                            <input type="text" id="cardNumber" class="form-control"
+                                   placeholder="4242 4242 4242 4242" maxlength="19" required/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Expiry Date</label>
+                            <input type="text" id="cardExpiry" class="form-control"
+                                   placeholder="MM/YY" maxlength="5" required/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">CVV</label>
+                            <input type="text" id="cardCvc" class="form-control"
+                                   placeholder="123" maxlength="3" required/>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="payBtn"
+                            class="btn btn-primary w-100 py-3 fw-bold mt-4 fs-5">
+                        <i class="bi bi-lock me-2"></i>
+                        Confirm &amp; Pay PKR
+                        <span th:text="${#numbers.formatInteger(price, 1, 'COMMA')}">8,500</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ─── Booking Summary Sidebar ─────────────────────────── -->
+        <div class="col-lg-4">
+            <div class="card p-4 sticky-top" style="top:20px;">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-receipt text-primary me-2"></i>
+                    Booking Summary
+                </h5>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Flight</span>
+                    <span class="fw-bold" th:text="${flightNumber}">PK-301</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Airline</span>
+                    <span th:text="${airline}">PIA</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Route</span>
+                    <span>
+                        <span th:text="${origin}">KHI</span>
+                        &rarr;
+                        <span th:text="${destination}">LHE</span>
+                    </span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Departure</span>
+                    <span th:text="${#temporals.format(departure, 'dd MMM, HH:mm')}">
+                        01 Jan, 08:00
+                    </span>
+                </div>
+                <hr/>
+                <div class="d-flex justify-content-between">
+                    <span class="fw-bold fs-5">Total</span>
+                    <span class="text-primary fw-bold fs-5">
+                        PKR <span th:text="${#numbers.formatInteger(price, 1, 'COMMA')}">8,500</span>
+                    </span>
+                </div>
+                <small class="text-muted mt-2 d-block">
+                    <i class="bi bi-shield-check text-success me-1"></i>
+                    Secured by Stripe
+                </small>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<footer th:replace="~{layout :: footer}"></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ─── Card input formatting ────────────────────────────────────────
+document.getElementById('cardNumber').addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/\D/g,'').replace(/(.{4})/g,'$1 ').trim();
+});
+document.getElementById('cardExpiry').addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/\D/g,'').replace(/(\d{2})(\d)/,'$1/$2');
+});
+document.getElementById('cardCvc').addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/\D/g,'');
+});
+
+// ─── Alert helper ────────────────────────────────────────────────
+function showAlert(msg, type) {
+    const box = document.getElementById('alertBox');
+    box.innerHTML = `
+        <div class="alert alert-${type} d-flex align-items-center mb-3">
+            <i class="bi bi-exclamation-circle me-2"></i>${msg}
+        </div>`;
+    setTimeout(() => box.innerHTML = '', 6000);
+}
+
+// ─── Booking submit ──────────────────────────────────────────────
+document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const btn = document.getElementById('payBtn');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing payment...';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch('/api/bookings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',   // ← HTTP-only cookie auth
+            body: JSON.stringify({
+                flightId:       document.getElementById('flightId').value,
+                seatId:         document.getElementById('seatId').value,
+                passengerName:  document.getElementById('passengerName').value.trim(),
+                passengerEmail: document.getElementById('passengerEmail').value.trim(),
+                passengerPhone: document.getElementById('passengerPhone').value.trim()
+            })
+        });
+
+        if (res.status === 401) {
+            window.location.href = '/login';
+            return;
+        }
+
+        const data = await res.json();
+
+        if (data.success) {
+            // Store display data only — used by confirmation page
+            localStorage.setItem('lastBooking', JSON.stringify(data.data));
+            window.location.href = '/booking/confirmation';
+        } else {
+            showAlert(data.message || 'Booking failed. Please try again.', 'danger');
+        }
+    } catch (err) {
+        showAlert('Server connection error. Please try again.', 'danger');
+    } finally {
+        btn.innerHTML = '<i class="bi bi-lock me-2"></i>Confirm &amp; Pay';
+        btn.disabled = false;
+    }
+});
+</script>
+
+<div th:replace="~{layout :: authScript}"></div>
+</body>
+</html>
