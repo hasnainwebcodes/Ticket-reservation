@@ -6,15 +6,11 @@ A production-grade flight booking platform built as a **Spring Boot monolith**, 
 
 ## 🚀 Live Demo
 
-> Coming soon — deploying in proccess
+> Checkout on https://ticket-reservation-production-64da.up.railway.app/
 
 ---
 
-## 📸 Screenshots
 
-| Home | Search Results | Booking | Confirmation |
-|------|---------------|---------|--------------|
-| ![Home](docs/screenshots/home.png) | ![Results](docs/screenshots/results.png) | ![Book](docs/screenshots/book.png) | ![Confirm](docs/screenshots/confirm.png) |
 
 ---
 
